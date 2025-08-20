@@ -9,6 +9,7 @@
 "5_learnpwm\usart.o"
 "5_learnpwm\stm32f4xx_it.o"
 "5_learnpwm\stm32f4xx_hal_msp.o"
+"5_learnpwm\bsp_drv8833.o"
 "5_learnpwm\stm32f4xx_hal_tim.o"
 "5_learnpwm\stm32f4xx_hal_tim_ex.o"
 "5_learnpwm\stm32f4xx_hal_rcc.o"

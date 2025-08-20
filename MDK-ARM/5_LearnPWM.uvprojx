@@ -403,6 +403,11 @@
               <FilePath>..\Core\Src\bsp_key.c</FilePath>
             </File>
             <File>
+              <FileName>bsp_drv8833.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\bsp_drv8833.c</FilePath>
+            </File>
+            <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Core/Src/main.c</FilePath>

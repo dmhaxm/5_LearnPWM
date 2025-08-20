@@ -27,6 +27,7 @@
 /* USER CODE BEGIN Includes */
 #include "bsp_printf.h"
 #include "bsp_key.h"
+#include "bsp_drv8833.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -38,6 +39,8 @@
 /* USER CODE BEGIN PD */
 #define DUTY_CYCLE_MAX 10
 #define DUTY_CYCLE_MIN 200
+//电机宏定义
+#define MID_COUNTER 20
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -98,15 +101,24 @@ int main(void)
   MX_USART1_UART_Init();
   MX_TIM3_Init();
   MX_TIM1_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
+  DRV8833_Init();  // 初始化电机驱动
 	HAL_TIM_Encoder_Start(&htim1,TIM_CHANNEL_ALL);  // 启动编码器
-	HAL_TIM_PWM_Start(&htim3,g_u32TimChannel[g_u8ChannelIndex]);  // 启动PWM
+  __HAL_TIM_SET_COUNTER(&htim1, MID_COUNTER);  
+  //__HAL_TIM_SET_COMPARE(&htim3,g_u32TimChannel[g_u8ChannelIndex],g_u8DutyCycle);  // 设置PWM占空比
+  //HAL_TIM_PWM_Start(&htim3,g_u32TimChannel[g_u8ChannelIndex]);
+	//HAL_TIM_PWM_Start(&htim3,g_u32TimChannel[g_u8ChannelIndex]);  // 启动PWM
+  DRV8833_SetDecayMode(SLOW_DECAY);
+  DRV8833_Forward(80);  // 设置电机前进，速度为20
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+		HAL_Delay(3000);
+		DRV8833_Coast();
     //1.按键控制PWM灯
       // if(KEY_Press(LED_PWM_GPIO_Port,LED_PWM_Pin))
       // {
@@ -147,23 +159,23 @@ int main(void)
     //4.编码器控制舵机
       //此处更改了频率为舵机需要的50HZ，对应的一圈20个脉冲，2个引脚记数应该为40，
       //但是我预分频器为2-1，所以一圈还是20，即0~360°为0~20，则要0~180°对应0~10
-      g_u8DutyCycle = __HAL_TIM_GET_COUNTER(&htim1);  // 获取编码器计数值
-      if(g_u8DutyCycle > DUTY_CYCLE_MIN)    //这里要先判断最大的，因为程序是从上往下执行的
-      {
-        g_u8DutyCycle = 0;
-        __HAL_TIM_SET_COUNTER(&htim1, g_u8DutyCycle);
-      }
-      else if(g_u8DutyCycle > DUTY_CYCLE_MAX)      
-      {
-        g_u8DutyCycle = DUTY_CYCLE_MAX;
-        __HAL_TIM_SET_COUNTER(&htim1, DUTY_CYCLE_MAX);
-      }
-      
-      qDebug("TIM_Chinnal:%d,g_u8DutyCycle:%d",g_u8ChannelIndex,g_u8DutyCycle);
-      g_u8DutyCycle = g_u8DutyCycle * 20 + 50; 
-      __HAL_TIM_SET_COMPARE(&htim3,g_u32TimChannel[g_u8ChannelIndex],g_u8DutyCycle);  // 设置PWM占空比
-      qDebug("g_u8DutyCycle:%.2f%%",(float)g_u8DutyCycle / 2000 * 100); //这里记得转换成浮点数
-      HAL_Delay(10);
+//      g_u8DutyCycle = __HAL_TIM_GET_COUNTER(&htim1);  // 获取编码器计数值
+//      if(g_u8DutyCycle > DUTY_CYCLE_MIN)    //这里要先判断最大的，因为程序是从上往下执行的
+//      {
+//        g_u8DutyCycle = 0;
+//        __HAL_TIM_SET_COUNTER(&htim1, g_u8DutyCycle);
+//      }
+//      else if(g_u8DutyCycle > DUTY_CYCLE_MAX)      
+//      {
+//        g_u8DutyCycle = DUTY_CYCLE_MAX;
+//        __HAL_TIM_SET_COUNTER(&htim1, DUTY_CYCLE_MAX);
+//      }
+//      
+//      qDebug("TIM_Chinnal:%d,g_u8DutyCycle:%d",g_u8ChannelIndex,g_u8DutyCycle);
+//      g_u8DutyCycle = g_u8DutyCycle * 20 + 50; 
+//      __HAL_TIM_SET_COMPARE(&htim3,g_u32TimChannel[g_u8ChannelIndex],g_u8DutyCycle);  // 设置PWM占空比
+//      qDebug("g_u8DutyCycle:%.2f%%",(float)g_u8DutyCycle / 2000 * 100); //这里记得转换成浮点数
+//      HAL_Delay(10);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

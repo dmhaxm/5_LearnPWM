@@ -1,4 +1,5 @@
-5_learnpwm/main.o: ..\Core\Src\main.c ..\Core\Inc\main.h \
+5_learnpwm/bsp_drv8833.o: ..\Core\Src\bsp_drv8833.c \
+  ..\Core\Inc\bsp_drv8833.h ..\Core\Inc\main.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal.h \
   ..\Core\Inc\stm32f4xx_hal_conf.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_rcc.h \
@@ -23,6 +24,4 @@
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_tim.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_tim_ex.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_uart.h \
-  ..\Core\Inc\dma.h ..\Core\Inc\tim.h ..\Core\Inc\usart.h \
-  ..\Core\Inc\gpio.h ..\Core\Inc\bsp_printf.h ..\Core\Inc\bsp_key.h \
-  ..\Core\Inc\bsp_drv8833.h
+  ..\Core\Inc\tim.h
