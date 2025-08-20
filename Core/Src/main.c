@@ -37,10 +37,10 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define DUTY_CYCLE_MAX 10
+#define DUTY_CYCLE_MAX 20
 #define DUTY_CYCLE_MIN 200
 //电机宏定义
-#define MID_COUNTER 20
+#define MID_COUNTER 10
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -52,8 +52,10 @@
 
 /* USER CODE BEGIN PV */
 uint8_t g_u8DutyCycle = 0;
+uint8_t g_u8Speed = 0;
 uint32_t g_u32TimChannel[2] = {TIM_CHANNEL_1, TIM_CHANNEL_2};
 uint8_t g_u8ChannelIndex = 0;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -105,20 +107,19 @@ int main(void)
   /* USER CODE BEGIN 2 */
   DRV8833_Init();  // 初始化电机驱动
 	HAL_TIM_Encoder_Start(&htim1,TIM_CHANNEL_ALL);  // 启动编码器
-  __HAL_TIM_SET_COUNTER(&htim1, MID_COUNTER);  
+  __HAL_TIM_SET_COUNTER(&htim1, MID_COUNTER);  //
   //__HAL_TIM_SET_COMPARE(&htim3,g_u32TimChannel[g_u8ChannelIndex],g_u8DutyCycle);  // 设置PWM占空比
   //HAL_TIM_PWM_Start(&htim3,g_u32TimChannel[g_u8ChannelIndex]);
 	//HAL_TIM_PWM_Start(&htim3,g_u32TimChannel[g_u8ChannelIndex]);  // 启动PWM
   DRV8833_SetDecayMode(SLOW_DECAY);
-  DRV8833_Forward(80);  // 设置电机前进，速度为20
-  /* USER CODE END 2 */
+  //DRV8833_Forward(80);  // 设置电机前进，速度为80
 
+  /* USER CODE END 2 */
+  
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-		HAL_Delay(3000);
-		DRV8833_Coast();
     //1.按键控制PWM灯
       // if(KEY_Press(LED_PWM_GPIO_Port,LED_PWM_Pin))
       // {
@@ -176,6 +177,31 @@ int main(void)
 //      __HAL_TIM_SET_COMPARE(&htim3,g_u32TimChannel[g_u8ChannelIndex],g_u8DutyCycle);  // 设置PWM占空比
 //      qDebug("g_u8DutyCycle:%.2f%%",(float)g_u8DutyCycle / 2000 * 100); //这里记得转换成浮点数
 //      HAL_Delay(10);
+    //5.编码器控制电机
+      //编码器值获取
+      g_u8DutyCycle = __HAL_TIM_GET_COUNTER(&htim1);
+      if(g_u8DutyCycle > DUTY_CYCLE_MIN)    //其实这里是对小于0的判断，只不过一小于0就会变成255，
+      {                                     //这里要先判断最大的，因为程序是从上往下执行的
+        g_u8DutyCycle = 0;
+        __HAL_TIM_SET_COUNTER(&htim1, g_u8DutyCycle);
+      }
+      else if(g_u8DutyCycle > DUTY_CYCLE_MAX)   //此处将DUTY_CYCLE_MAX改成20，因为这次要用到的是编码器360°范围
+      {
+        g_u8DutyCycle = DUTY_CYCLE_MAX;
+        __HAL_TIM_SET_COUNTER(&htim1, DUTY_CYCLE_MAX);
+      }
+      //速度控制
+      if(g_u8DutyCycle < MID_COUNTER)
+      {
+        g_u8Speed = (MID_COUNTER - g_u8DutyCycle) * 100 / MID_COUNTER;  //将0~9映射到0~100
+        DRV8833_Backward(g_u8Speed);
+      }
+      else{
+        g_u8Speed = (g_u8DutyCycle - MID_COUNTER) * 100 / (MID_COUNTER);  //将11~20映射到0~100
+        DRV8833_Forward(g_u8Speed);
+      }
+      qDebug("PWM Speed: %d", g_u8Speed);
+      HAL_Delay(100);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
