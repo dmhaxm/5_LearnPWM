@@ -28,6 +28,7 @@
 #include "bsp_printf.h"
 #include "bsp_key.h"
 #include "bsp_drv8833.h"
+#include "test_pwm.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -55,7 +56,8 @@ uint8_t g_u8DutyCycle = 0;
 uint8_t g_u8Speed = 0;
 uint32_t g_u32TimChannel[2] = {TIM_CHANNEL_1, TIM_CHANNEL_2};
 uint8_t g_u8ChannelIndex = 0;
-
+uint32_t g_u32TestFrequence = 0;  // PWM频率
+uint8_t g_u8TestDutyCycle = 0;  // PWM占空比
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -101,13 +103,17 @@ int main(void)
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_USART1_UART_Init();
-  MX_TIM3_Init();
   MX_TIM1_Init();
   MX_TIM2_Init();
+  MX_TIM8_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
   DRV8833_Init();  // 初始化电机驱动
+  TEST_PWM_Init();
 	HAL_TIM_Encoder_Start(&htim1,TIM_CHANNEL_ALL);  // 启动编码器
-  __HAL_TIM_SET_COUNTER(&htim1, MID_COUNTER);  //
+  //__HAL_TIM_SET_COUNTER(&htim1, MID_COUNTER);  //
+  __HAL_TIM_SET_COUNTER(&htim1, 12);
+	HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_1);
   //__HAL_TIM_SET_COMPARE(&htim3,g_u32TimChannel[g_u8ChannelIndex],g_u8DutyCycle);  // 设置PWM占空比
   //HAL_TIM_PWM_Start(&htim3,g_u32TimChannel[g_u8ChannelIndex]);
 	//HAL_TIM_PWM_Start(&htim3,g_u32TimChannel[g_u8ChannelIndex]);  // 启动PWM
@@ -115,7 +121,7 @@ int main(void)
   //DRV8833_Forward(80);  // 设置电机前进，速度为80
 
   /* USER CODE END 2 */
-  
+
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
@@ -200,7 +206,16 @@ int main(void)
         g_u8Speed = (g_u8DutyCycle - MID_COUNTER) * 100 / (MID_COUNTER);  //将11~20映射到0~100
         DRV8833_Forward(g_u8Speed);
       }
+      TEST_PWM_Get(&g_u32TestFrequence, &g_u8TestDutyCycle);
       qDebug("PWM Speed: %d", g_u8Speed);
+      if (g_u32TestFrequence != 0)
+      {
+        qDebug("PWM_Test Frequency: %d Hz, Duty Cycle: %d%%", g_u32TestFrequence, g_u8TestDutyCycle);
+      }
+      else
+      {
+        qDebug("PWM_Test: no signal");
+      }
       HAL_Delay(100);
     /* USER CODE END WHILE */
 

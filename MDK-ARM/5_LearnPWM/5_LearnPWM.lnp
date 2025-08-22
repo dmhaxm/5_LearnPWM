@@ -1,5 +1,6 @@
 --cpu=Cortex-M4.fp.sp
 "5_learnpwm\startup_stm32f407xx.o"
+"5_learnpwm\test_pwm.o"
 "5_learnpwm\bsp_printf.o"
 "5_learnpwm\bsp_key.o"
 "5_learnpwm\bsp_drv8833.o"
